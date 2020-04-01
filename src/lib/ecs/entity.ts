@@ -8,8 +8,16 @@ export class ComponentChange extends Event {
 }
 
 export default class Entity {
+  /** ID of entity, must be unique. Used for caching/mapping */
   public id: string = 'not-set';
+
+  /** Name of entity, useful for debugging purposes */
   public name: string;
+
+  /** Set this to true to mark entity as remove */
+  public delete: boolean = false;
+  
+  /** Dependency injection of emit event */
   public emit: EmitEvent = () => {};
 
   /** A map of all components, indexed by the function signature. */
@@ -67,6 +75,13 @@ export default class Entity {
     this.components.delete(name);
     this.emitChange(name)
     return this;
+  }
+
+  /**
+   * Sets the entity to be removed next tick
+   */
+  public remove() {
+    this.delete = true;
   }
 
   /**

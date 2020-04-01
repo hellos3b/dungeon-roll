@@ -5,25 +5,25 @@ import Scene from '../scene';
 import System from '../system';
 
 /** Spy on calls */
-const updateWork = jest.fn();
-const updateSingleWorkers = jest.fn();
+const updateFruit = jest.fn();
+const updateFruitSales = jest.fn();
 
 /** Sample Components */
-const Single = Component.define("single", {})
-const Working = Component.define("working", {
-  job: "",
-  salary: 50000
+const Fruit = Component.define("fruit", {})
+const OnSale = Component.define("on-sale", {
+  amount: 0,
+  price: 0
 })
 
 /** Systems */
-class WorkSystem extends System {
-  family = [Working];
-  update = updateWork;
+class FruitSystem extends System {
+  family = [Fruit];
+  update = updateFruit;
 }
 
-class SingleWorkerSystem extends System {
-  family = [Working, Single];
-  update = updateSingleWorkers;
+class FruitSaleSystem extends System {
+  family = [Fruit, OnSale];
+  update = updateFruitSales;
 }
 
 // Begin tests
@@ -31,35 +31,35 @@ describe('ECS Engine', () => {
   /** references */
   let engine: Engine,
     scene: Scene,
-    jim: Entity,
-    pam: Entity,
-    michael: Entity;
+    apple: Entity,
+    tomato: Entity,
+    broccoli: Entity;
 
   beforeEach(() => {
     // Reset mock functions
-    updateWork.mockReset();
-    updateSingleWorkers.mockReset();
+    updateFruit.mockReset();
+    updateFruitSales.mockReset();
 
     // Create entities
-    jim = Entity.create("jim", [
-      Single(),
-      Working({ job: "sales" })
+    apple = Entity.create("apple", [
+      Fruit(),
+      OnSale({ price: 5 })
     ])
 
-    pam = Entity.create("pam", [
-      Working({ job: "receptionist" })
+    tomato = Entity.create("tomato", [
+      Fruit()
     ])
 
-    michael = Entity.create("michael");
+    broccoli = Entity.create("broccoli");
 
     // Create scene
-    scene = Scene.create("Scene", {
+    scene = Scene.create("Grocery Store", {
       systems: [
-        new WorkSystem(),
-        new SingleWorkerSystem()
+        new FruitSystem(),
+        new FruitSaleSystem()
       ],
       entities: [
-        jim, pam, michael
+        apple, tomato, broccoli
       ]
     })
   
@@ -70,65 +70,92 @@ describe('ECS Engine', () => {
 
   describe("Component", () => {
     it("can be referenced by name in instance or creator", () => {
-      const work = Working();
-      expect(Working.componentName).toEqual(work.name)
+      const fruit = Fruit();
+      expect(Fruit.componentName).toEqual(fruit.name)
     })
     
     it("merges in new properties", () => {
-      const work = Working({job: "manager"})
-      expect(work.state.job).toEqual("manager")
-      expect(work.state.salary).toEqual(50000)
+      const sale = OnSale({amount: 12})
+      expect(sale.state).toEqual({
+        amount: 12,
+        price: 0
+      })
     })
   })
 
   describe("Entity", () => {
     it("has components", () => {
-      expect(jim.componentsList).toHaveLength(2)
+      expect(apple.componentsList).toHaveLength(2)
     })
 
-    it("can get component by base class", () => {
-      const working = jim.getComponent(Working)
-      expect(working.state.job).toEqual("sales")
+    it("returns component", () => {
+      const onSale = apple.getComponent(OnSale)
+      const notOnSale = tomato.getComponent(OnSale)
+      expect(onSale).toBeTruthy();
+      expect(notOnSale).toBeFalsy();
     })
 
     it("removes components by class", () => {
-      jim.removeComponent(Working);
-      expect(jim.componentsList).toHaveLength(1);
+      apple.removeComponent(OnSale);
+      expect(apple.getComponent(OnSale)).toBeFalsy();
     })
 
     it("removes components by instance", () => {
-      const working = jim.getComponent(Working);
-      jim.removeComponent(working);
-      expect(jim.componentsList).toHaveLength(1);
+      const sale = apple.getComponent(OnSale);
+      apple.removeComponent(sale);
+      expect(apple.getComponent(OnSale)).toBeFalsy();
     })
     
     it("adds components", () => {
-      pam.addComponent(Single())
-      expect(pam.componentsList).toHaveLength(2);
+      tomato.addComponent(OnSale())
+      expect(tomato.getComponent(OnSale)).toBeTruthy();
     })
 
     it("serializes to JSON", () => {
-      const json = pam.toJSON()
-      expect(json.id).not.toBeNull();
-      expect(json.components).toHaveLength(1)
+      const json = apple.toJSON()
+      expect(json.id).toBeTruthy();
+      expect(json.components).toHaveLength(2)
     })
   })
   
-  describe("System", () => {
-    it("gets passed the right amount of entities", () => {
-      engine.run(0);
-      expect(updateWork.mock.calls[0][0]).toHaveLength(2)
+  describe("Scene", () => {
+    it("serializes", () => {
+      const json = scene.toJSON();
+      expect(json.name).toEqual("Grocery Store");
+      expect(json.entities).toHaveLength(3);
     })
 
-    it("gets the right entities when family has two components", () => {
-      engine.run(0);
-      expect(updateSingleWorkers.mock.calls[0][0]).toHaveLength(1);
+    it("removes entities", () => {
+      broccoli.remove()
+      engine.run(0) 
+      expect(scene.entities).not.toContain(broccoli)
     })
-    
-    it("updates entities when components are changed", () => {
-      jim.removeComponent(Working)
-      engine.run(0);
-      expect(updateWork.mock.calls[0][0]).toHaveLength(1);
+
+    describe("System", () => {
+      // Shorthand to get first argument from update() call
+      const expectEntitiesFrom = (fn: jest.Mock) => expect(fn.mock.calls[0][0])
+
+      it("passes the right amount of entities", () => {
+        engine.run(0);
+        expectEntitiesFrom(updateFruit).toHaveLength(2)
+      })
+  
+      it("passes the right entities when family has two components", () => {
+        engine.run(0);
+        expectEntitiesFrom(updateFruitSales).toHaveLength(1);
+      })
+      
+      it("updates entities when components are changed", () => {
+        tomato.removeComponent(Fruit)
+        engine.run(0);
+        expectEntitiesFrom(updateFruit).toHaveLength(1);
+      })
+  
+      it("updates entities when entities are removed", () => {
+        tomato.remove();
+        engine.run(0)
+        expectEntitiesFrom(updateFruit).toHaveLength(1);
+      })
     })
   })
 });

@@ -10,7 +10,7 @@ export default class Scene {
   public name: string;
 
   /** A map of entities, indexed by entity ID */
-  private entities: Map<string, Entity> = new Map();
+  public entities: Entity[] = [];
 
   /** All the current systems */
   private systems: System[] = [];
@@ -20,7 +20,7 @@ export default class Scene {
 
   /** Event emitter */
   public events = new EventEmitter();
-
+  
   constructor(name = "New Scene") {
     this.name = name;
     
@@ -54,7 +54,17 @@ export default class Scene {
    * @param delta Time since last update
    */
   public update(delta: number) {
-    this.componentsCache.update(Array.from(this.entities.values()));
+    this.entities = this.entities
+      .filter( entity => {
+        if (!entity.delete) return true;
+
+        // Mark entity as dirty
+        this.dirtifyEntity(entity)
+
+        return false;
+      })
+
+    this.componentsCache.update(this.entities);
 
     this.systems.forEach(system => {
       const entities = this.componentsCache.getEntitiesWith(system.family);
@@ -71,13 +81,20 @@ export default class Scene {
     entity.id = shortid.generate();
     entity.emit = this.events.emit;
       
-    this.entities.set(entity.id, entity);
-    
-    entity.componentsList.map(comp => {
-      this.componentsCache.dirtify(comp.name);
-    })
+    this.entities.push(entity);
+    this.dirtifyEntity(entity);
 
     return entity;
+  }
+
+  /**
+   * Mark all components from an entity as "dirty"
+   * 
+   */
+  private dirtifyEntity(entity: Entity) {
+    entity.componentsList.forEach(comp => {
+      this.componentsCache.dirtify(comp.name);
+    })
   }
 
   /**
@@ -87,6 +104,13 @@ export default class Scene {
    */
   public addSystem(system: System) {
     this.systems.push(system);    
+  }
+
+  public toJSON() {
+    return {
+      name: this.name,
+      entities: this.entities.map( i => i.toJSON() )
+    }
   }
 }
 
