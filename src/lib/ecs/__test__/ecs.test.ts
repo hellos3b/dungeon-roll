@@ -1,15 +1,16 @@
+import Component from '../component';
 import Engine from '../Engine';
 import Entity from '../entity';
+import Scene from '../scene';
 import System from '../system';
-import {createComponent} from '../component';
 
 /** Spy on calls */
 const updateWork = jest.fn();
 const updateSingleWorkers = jest.fn();
 
 /** Sample Components */
-const Single = createComponent("single", {})
-const Working = createComponent("working", {
+const Single = Component.define("single", {})
+const Working = Component.define("working", {
   job: "",
   salary: 50000
 })
@@ -29,33 +30,50 @@ class SingleWorkerSystem extends System {
 describe('ECS Engine', () => { 
   /** references */
   let engine: Engine,
+    scene: Scene,
     jim: Entity,
     pam: Entity,
     michael: Entity;
 
   beforeEach(() => {
-    // Create engine
-    engine = new Engine();
-  
-    // Add system that updates Component1
-    engine.addSystems([
-      new WorkSystem(),
-      new SingleWorkerSystem()
-    ]);
+    // Reset mock functions
     updateWork.mockReset();
-  
-    // Add two entities
-    jim = engine.createEntity("jim", [
+    updateSingleWorkers.mockReset();
+
+    // Create entities
+    jim = Entity.create("jim", [
       Single(),
       Working({ job: "sales" })
     ])
-    pam = engine.createEntity("pam", [
+
+    pam = Entity.create("pam", [
       Working({ job: "receptionist" })
     ])
-    michael = engine.createEntity("dwight");
+
+    michael = Entity.create("michael");
+
+    // Create scene
+    scene = Scene.create("Scene", {
+      systems: [
+        new WorkSystem(),
+        new SingleWorkerSystem()
+      ],
+      entities: [
+        jim, pam, michael
+      ]
+    })
+  
+    // Begin engine
+    engine = new Engine();
+    engine.setScene(scene);
   })
 
   describe("Component", () => {
+    it("can be referenced by name in instance or creator", () => {
+      const work = Working();
+      expect(Working.componentName).toEqual(work.name)
+    })
+    
     it("merges in new properties", () => {
       const work = Working({job: "manager"})
       expect(work.state.job).toEqual("manager")

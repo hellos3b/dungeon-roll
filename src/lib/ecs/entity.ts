@@ -1,4 +1,4 @@
-import { Component, ComponentCreator } from './component';
+import Component, {ComponentCreator} from './component';
 import {EmitEvent, Event} from './eventEmitter';
 
 import clone from 'clone';
@@ -8,34 +8,25 @@ export class ComponentChange extends Event {
 }
 
 export default class Entity {
-  public id: string;
+  public id: string = 'not-set';
   public name: string;
-  private emit: EmitEvent;
+  public emit: EmitEvent = () => {};
 
   /** A map of all components, indexed by the function signature. */
   private components = new Map<string, Component>();
 
-  constructor(id: string, name: string = "New Entity", emit: EmitEvent = ()=>{}) {
-    this.id = id;
+  constructor(name: string = "New Entity") {
     this.name = name;
-    this.emit = emit;
   }
 
   get componentsList() {
     return Array.from(this.components.values())
   }
 
-  /**
-   * Add a list of components to the entity 
-   * 
-   * @param components
-   **/
-  addComponents(components: Component[]) {
-    components.forEach( component => {
-      this.addComponent(component)
-    });
-
-    return this;
+  public static create(name: string, components: Component[]=[]) {
+    const entity = new Entity(name);
+    components.forEach( comp => entity.addComponent(comp));
+    return entity;
   }
 
   /**
@@ -43,7 +34,7 @@ export default class Entity {
    * 
    * @param components
    **/
-  addComponent(component: Component) {
+  public addComponent(component: Component) {
     this.components.set(component.name, clone(component))
     this.emitChange(component.name);
   }
@@ -53,7 +44,7 @@ export default class Entity {
    * 
    * @param createComponent
    **/
-  getComponentByName<T>(componentName: string) {
+  public getComponentByName<T>(componentName: string) {
     return this.components.get(componentName) as Component<T>;
   }
 
@@ -62,7 +53,7 @@ export default class Entity {
    * 
    * @param createComponent
    **/
-  getComponent<T>(createComponent: ComponentCreator<T>) {
+  public getComponent<T>(createComponent: ComponentCreator<T>) {
     return this.getComponentByName<T>(createComponent.componentName);
   }
   
@@ -71,7 +62,7 @@ export default class Entity {
    * 
    * @param component 
    **/
-  removeComponent(component: Component|ComponentCreator<any>) {
+  public removeComponent(component: Component|ComponentCreator<any>) {
     let name = (typeof component === 'function') ? component.componentName : component.name;
     this.components.delete(name);
     this.emitChange(name)
@@ -83,11 +74,11 @@ export default class Entity {
    * 
    * @param components
    */
-  emitChange(componentName: string) {
+  public emitChange(componentName: string) {
     this.emit(ComponentChange, {componentName})
   }
 
-  toJSON() {
+  public toJSON() {
     return {
       id: this.id,
       name: this.name,

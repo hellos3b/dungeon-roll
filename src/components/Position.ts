@@ -1,4 +1,4 @@
-import {createComponent} from '../lib/ecs';
+import {Component} from '../lib/ecs';
 
 type Position = {
   /** X Position */
@@ -7,7 +7,7 @@ type Position = {
   y: number;
 }
 
-export default createComponent<Position>("position", {
+export default Component.define<Position>("position", {
   x: 0, 
   y: 0
 });

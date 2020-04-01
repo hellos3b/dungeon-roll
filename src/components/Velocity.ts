@@ -1,4 +1,4 @@
-import { createComponent } from "../lib/ecs";
+import { Component } from "../lib/ecs";
 
 type Velocity = {
   /** X Velocity */
@@ -7,7 +7,7 @@ type Velocity = {
   vy: number;
 }
 
-export default createComponent<Velocity>("velocity", {
+export default Component.define<Velocity>("velocity", {
   vx: 0,
   vy: 0
 })
