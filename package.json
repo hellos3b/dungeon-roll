@@ -1,0 +1,30 @@
+{
+  "name": "idle-crossing",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "parcel src/index.html",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "build": "tsc"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/clone": "^0.1.30",
+    "@types/jest": "^25.1.4",
+    "@types/shortid": "0.0.29",
+    "jest": "^25.2.4",
+    "parcel-bundler": "^1.12.4",
+    "ts-jest": "^25.3.0",
+    "ts-mocha": "^7.0.0",
+    "ts-node": "^8.8.1",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "clone": "^2.1.2",
+    "deepcopy": "^2.0.0",
+    "shortid": "^2.2.15"
+  }
+}

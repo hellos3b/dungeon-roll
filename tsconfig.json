@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "experimentalDecorators": true,
+    "target": "es6",
+    "module": "commonjs",
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "noImplicitThis": true,
+    "strictPropertyInitialization": false,
+    "lib": [
+      "es6",
+      "dom"
+    ]
+  }
+}
