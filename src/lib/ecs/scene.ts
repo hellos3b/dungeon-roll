@@ -115,7 +115,6 @@ export default class Scene {
 }
 
 interface IScene {
-  setup?():void;
   systems?: System[];
   entities?: Entity[];
 }
