@@ -1,6 +1,6 @@
 import * as PIXI from 'pixi.js';
 
-import Sprites from '../sprites/*.jpg';
+import Sprites from '../../assets/sprites/*.jpg';
 
 class Renderer {
   app = new PIXI.Application();
@@ -10,6 +10,7 @@ class Renderer {
     const loader = this.loader;
     
     return new Promise( (resolve, reject) => {
+      console.log("SPrites", Sprites)
       //@ts-ignore
       for (var k in Sprites) {
         loader.add(Sprites[k])

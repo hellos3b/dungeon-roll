@@ -1,10 +1,8 @@
 import 'regenerator-runtime/runtime'
 
-import * as PIXI from 'pixi.js';
-
-import { Engine } from './lib/ecs';
-import Main from './scenes/Main';
-import renderer from './core/renderer';
+import { Engine } from 'lib/ecs';
+import Main from 'game/scenes/Main';
+import renderer from 'game/core/renderer';
 
 const engine = new Engine()
 
@@ -27,4 +25,4 @@ function run(prevTime: number) {
 
   // start game
   run(new Date().getTime())
-})()
+})();

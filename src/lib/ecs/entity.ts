@@ -46,7 +46,6 @@ class EntityClass {
   public addComponent(component: Component) {
     this.components.set(component.name, component)
     component.setup();
-
     this.emitChange(component.name, ComponentAdd)
   }
 
@@ -94,7 +93,7 @@ class EntityClass {
     return this;
   }
 
-  teardown() {
+  public teardown() {
     this.componentsList.forEach(component => {
       this.removeComponent(component);
     });
@@ -112,7 +111,7 @@ class EntityClass {
    * 
    * @param componentName
    */
-  public emitChange(componentName: string, EventType: typeof Event) {
+  private emitChange(componentName: string, EventType: typeof Event) {
     const evt = {
       componentName,
       entity: this

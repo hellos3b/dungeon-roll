@@ -20,7 +20,7 @@ export default class Component<T=any> extends ComponentClass<T> {
    * @param name 
    * @param props 
    */
-  public static define<T={}>(name: string, props: DefineComponent<T> = {}) {
+  public static define<T={}, U={}>(name: string, props: DefineComponent<T> = {}) {
     function merge(newState: Partial<T> = {}): Component<T> {
       const comp = new Component<T>(name);
     
@@ -43,7 +43,7 @@ export default class Component<T=any> extends ComponentClass<T> {
   }
 }
 
-export interface ComponentCreator<T> extends WithComponentName {
+export interface ComponentCreator<T={}> extends WithComponentName {
   (newState?: Partial<T>): Component<T>;
 }
 
@@ -54,8 +54,6 @@ interface DefineComponent<T> {
   setup?(this: Component<T>):void;
   /** Called when component is removed */
   teardown?(this: Component<T>):void;
-
-  // todo: add a `serialize()` field maybe?
 }
 
 interface WithComponentName {

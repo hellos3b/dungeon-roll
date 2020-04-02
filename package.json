@@ -28,5 +28,10 @@
     "deepmerge": "^4.2.2",
     "pixi.js": "^5.2.1",
     "shortid": "^2.2.15"
+  },
+  "alias": {
+    "lib": "./src/lib",
+    "game": "./src/game",
+    "assets": "./src/assets"
   }
 }

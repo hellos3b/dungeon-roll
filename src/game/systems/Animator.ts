@@ -1,6 +1,6 @@
-import {Entity, System} from '../lib/ecs';
+import {Entity, System} from 'lib/ecs';
 
-import Position from '../components/Position';
+import Position from 'game/components/Position';
 
 export default class Animator implements System {
   family = [Position];

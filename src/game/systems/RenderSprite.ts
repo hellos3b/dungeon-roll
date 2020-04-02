@@ -1,8 +1,8 @@
-import {Entity, System} from '../lib/ecs';
+import {Entity, System} from 'lib/ecs';
 
-import Position from '../components/Position';
-import Sprite from '../components/Sprite';
-import SpriteRenderer from '../components/SpriteRenderer';
+import Position from 'game/components/Position';
+import Sprite from 'game/components/Sprite';
+import SpriteRenderer from 'game/components/SpriteRenderer';
 
 export default class RenderSprite implements System {
   family = [Sprite, SpriteRenderer];

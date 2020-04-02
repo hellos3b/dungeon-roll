@@ -1,4 +1,4 @@
-import {Component} from '../lib/ecs';
+import {Component} from 'lib/ecs';
 
 type Position = {
   /** X Position */
