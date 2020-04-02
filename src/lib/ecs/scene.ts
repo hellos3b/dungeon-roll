@@ -1,7 +1,7 @@
 import Entity, { ComponentChange } from "./entity";
 
 import ComponentsCache from './components-cache';
-import { EventEmitter } from "./eventEmitter";
+import { EventEmitter } from "../events";
 import System from "./system";
 import shortid from 'shortid';
 

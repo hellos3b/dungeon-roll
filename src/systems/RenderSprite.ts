@@ -8,20 +8,17 @@ export default class RenderSprite implements System {
   family = [Sprite, SpriteRenderer];
 
   update(entities: Entity[]) {
-    // Update all existing sprites
-    entities.forEach( entity => {
-      this.updateSprite(entity);
-    });
-  }
+    for (var i = 0; i < entities.length; i++) {
+      const entity = entities[i]
+      const spriteComponent = entity.getComponent(Sprite);
+      const sprite = spriteComponent.state.sprite;
 
-  updateSprite(entity: Entity) {
-    const spriteComponent = entity.getComponent(Sprite);
-    const sprite = spriteComponent.state.sprite;
-
-    const position = entity.getComponent(Position);
-    if (!!position) {
-      sprite.x = position.state.x;
-      sprite.y = position.state.y;
+      // Check position
+      const position = entity.getComponent(Position);
+      if (!!position) {
+        sprite.x = position.state.x;
+        sprite.y = position.state.y;
+      } 
     }
   }
 }

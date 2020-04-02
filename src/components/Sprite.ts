@@ -18,10 +18,10 @@ export default Component.define<Sprite>("sprite", {
   },
   
   setup() {
-    const sprite = this.state.sprite
-
     if (!this.state.src) throw new Error("src must be set on state")
-
+    
+    const sprite = this.state.sprite
+    
     sprite.texture = renderer.getTexture(this.state.src);
     renderer.addSprite(sprite)
   },

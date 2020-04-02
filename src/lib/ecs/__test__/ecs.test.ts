@@ -1,5 +1,5 @@
 import Component from '../component';
-import Engine from '../Engine';
+import Engine from '../engine';
 import Entity from '../entity';
 import Scene from '../scene';
 import System from '../system';

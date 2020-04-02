@@ -1,5 +1,4 @@
-import { Component, ComponentCreator } from './component';
-
+import { ComponentCreator } from './component';
 import Entity from './entity';
 
 /**
@@ -16,8 +15,6 @@ export default class ComponentsCache {
    * A map of component names marked as whether they have changed or not
    */
   private dirty = new Map<string, boolean>();
-
-  constructor() {}
 
   /**
    * Update entities

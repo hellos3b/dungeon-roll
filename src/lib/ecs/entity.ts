@@ -1,7 +1,16 @@
 import Component, {ComponentCreator} from './component';
-import {EmitEvent, Event} from './eventEmitter';
+import {EmitEvent, Event} from '../events';
 
 export class ComponentChange extends Event {
+  entity: Entity;
+  componentName: string;
+}
+export class ComponentAdd extends Event {
+  entity: Entity;
+  componentName: string;
+}
+export class ComponentRemove extends Event {
+  entity: Entity;
   componentName: string;
 }
 
@@ -102,7 +111,10 @@ class EntityClass {
    * @param components
    */
   public emitChange(componentName: string) {
-    this.emit(ComponentChange, {componentName})
+    this.emit(ComponentChange, {
+      componentName,
+      entity: this
+    })
   }
 
   public toJSON() {
