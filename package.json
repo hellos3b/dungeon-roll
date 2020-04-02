@@ -25,6 +25,8 @@
   "dependencies": {
     "clone": "^2.1.2",
     "deepcopy": "^2.0.0",
+    "deepmerge": "^4.2.2",
+    "pixi.js": "^5.2.1",
     "shortid": "^2.2.15"
   }
 }

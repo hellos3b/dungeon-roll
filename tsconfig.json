@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "strict": true,
-    "experimentalDecorators": true,
     "target": "es6",
     "module": "commonjs",
     "sourceMap": true,
@@ -12,5 +11,8 @@
       "es6",
       "dom"
     ]
-  }
+  },
+  "include": [
+    "./src/**/*"
+  ]
 }

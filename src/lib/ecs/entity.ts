@@ -1,13 +1,11 @@
 import Component, {ComponentCreator} from './component';
 import {EmitEvent, Event} from './eventEmitter';
 
-import clone from 'clone';
-
 export class ComponentChange extends Event {
   componentName: string;
 }
 
-export default class Entity {
+class EntityClass {
   /** ID of entity, must be unique. Used for caching/mapping */
   public id: string = 'not-set';
 
@@ -31,29 +29,33 @@ export default class Entity {
     return Array.from(this.components.values())
   }
 
-  public static create(name: string, components: Component[]=[]) {
-    const entity = new Entity(name);
-    components.forEach( comp => entity.addComponent(comp));
-    return entity;
-  }
-
   /**
    * Add a single component to the entity
    * 
    * @param components
    **/
   public addComponent(component: Component) {
-    this.components.set(component.name, clone(component))
+    this.components.set(component.name, component)
+    component.setup();
     this.emitChange(component.name);
   }
 
   /** 
    * Get a specific component from this entity 
    * 
-   * @param createComponent
+   * @param componentName
    **/
   public getComponentByName<T>(componentName: string) {
     return this.components.get(componentName) as Component<T>;
+  }
+
+  /** 
+   * Check if an entity exists 
+   * 
+   * @param createComponent
+   **/
+  public hasComponent(createComponent: ComponentCreator<any>) {
+    return !!this.getComponentByName(createComponent.componentName)
   }
 
   /** 
@@ -70,11 +72,21 @@ export default class Entity {
    * 
    * @param component 
    **/
-  public removeComponent(component: Component|ComponentCreator<any>) {
-    let name = (typeof component === 'function') ? component.componentName : component.name;
+  public removeComponent(findComponent: Component|ComponentCreator<any>) {
+    let name = (typeof findComponent === 'function') ? findComponent.componentName : findComponent.name;
+    const component = this.components.get(name);
+
+    component?.teardown();
     this.components.delete(name);
     this.emitChange(name)
+    
     return this;
+  }
+
+  teardown() {
+    this.componentsList.forEach(component => {
+      this.removeComponent(component);
+    });
   }
 
   /**
@@ -99,5 +111,13 @@ export default class Entity {
       name: this.name,
       components: [...this.components.values()]
     }
+  }
+}
+
+export default class Entity extends EntityClass {
+  public static create(name: string, components: Component[]=[]) {
+    const entity = new Entity(name);
+    components.forEach( comp => entity.addComponent(comp));
+    return entity;
   }
 }

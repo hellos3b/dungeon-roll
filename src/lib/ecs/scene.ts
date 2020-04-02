@@ -54,13 +54,13 @@ export default class Scene {
    * @param delta Time since last update
    */
   public update(delta: number) {
+    // Remove old entities
     this.entities = this.entities
       .filter( entity => {
         if (!entity.delete) return true;
 
-        // Mark entity as dirty
-        this.dirtifyEntity(entity)
-
+        entity.teardown()
+        
         return false;
       })
 

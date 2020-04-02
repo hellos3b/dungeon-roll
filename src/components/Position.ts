@@ -7,7 +7,9 @@ type Position = {
   y: number;
 }
 
-export default Component.define<Position>("position", {
-  x: 0, 
+const initialState = {
+  x: 0,
   y: 0
-});
+}
+
+export default Component.define<Position>("position", {state: initialState});

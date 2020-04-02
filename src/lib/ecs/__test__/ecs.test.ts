@@ -7,21 +7,32 @@ import System from '../system';
 /** Spy on calls */
 const updateFruit = jest.fn();
 const updateFruitSales = jest.fn();
+const componentSetup = jest.fn();
+const componentTeardown = jest.fn();
 
 /** Sample Components */
-const Fruit = Component.define("fruit", {})
+const Fruit = Component.define("fruit")
 const OnSale = Component.define("on-sale", {
-  amount: 0,
-  price: 0
+  state: {
+    amount: 0,
+    price: 0,
+    section: ""
+  },
+  setup() {
+    this.state.section = "fresh";
+    componentSetup();
+  },
+  teardown: componentTeardown
 })
 
+
 /** Systems */
-class FruitSystem extends System {
+class FruitSystem implements System {
   family = [Fruit];
   update = updateFruit;
 }
 
-class FruitSaleSystem extends System {
+class FruitSaleSystem implements System {
   family = [Fruit, OnSale];
   update = updateFruitSales;
 }
@@ -39,6 +50,8 @@ describe('ECS Engine', () => {
     // Reset mock functions
     updateFruit.mockReset();
     updateFruitSales.mockReset();
+    componentSetup.mockReset();
+    componentTeardown.mockReset();
 
     // Create entities
     apple = Entity.create("apple", [
@@ -68,6 +81,7 @@ describe('ECS Engine', () => {
     engine.setScene(scene);
   })
 
+  /** Tests ! */
   describe("Component", () => {
     it("can be referenced by name in instance or creator", () => {
       const fruit = Fruit();
@@ -76,16 +90,43 @@ describe('ECS Engine', () => {
     
     it("merges in new properties", () => {
       const sale = OnSale({amount: 12})
-      expect(sale.state).toEqual({
-        amount: 12,
-        price: 0
-      })
+      expect(sale.state.amount).toEqual(12)
+      expect(sale.state.price).toEqual(0)
+    })
+
+    it("called setup when entity was added", () => {
+      expect(componentSetup).toBeCalled();
+    })
+
+    it("called teardown when entity was removed", () => {
+      apple.remove();
+      engine.run(0);
+      expect(componentTeardown).toBeCalled();
+    })
+
+    it("called setup when component was added", () => {
+      componentSetup.mockReset()
+      tomato.addComponent(OnSale())
+      expect(componentSetup).toBeCalled()
+    })
+
+    it("called teardown when component was removed", () => {
+      componentTeardown.mockReset();
+      apple.removeComponent(OnSale);
+      engine.run(0);
+      expect(componentTeardown).toBeCalled();
+    })
+
+    it("updates own state on setup", () => {
+      const sale = apple.getComponent(OnSale)
+      expect(sale.state.section).toEqual("fresh")
     })
   })
 
   describe("Entity", () => {
     it("has components", () => {
-      expect(apple.componentsList).toHaveLength(2)
+      expect(apple.hasComponent(Fruit)).toBeTruthy()
+      expect(apple.hasComponent(OnSale)).toBeTruthy()
     })
 
     it("returns component", () => {
