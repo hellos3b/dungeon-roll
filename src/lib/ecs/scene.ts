@@ -103,6 +103,7 @@ export default class Scene {
    * @param system 
    */
   public addSystem(system: System) {
+    system.events = this.events;
     this.systems.push(system);    
   }
 

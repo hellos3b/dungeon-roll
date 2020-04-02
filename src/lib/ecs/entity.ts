@@ -46,7 +46,8 @@ class EntityClass {
   public addComponent(component: Component) {
     this.components.set(component.name, component)
     component.setup();
-    this.emitChange(component.name);
+
+    this.emitChange(component.name, ComponentAdd)
   }
 
   /** 
@@ -87,7 +88,8 @@ class EntityClass {
 
     component?.teardown();
     this.components.delete(name);
-    this.emitChange(name)
+
+    this.emitChange(name, ComponentRemove)
     
     return this;
   }
@@ -108,13 +110,16 @@ class EntityClass {
   /**
    * Sends out an event that a component was added or removed
    * 
-   * @param components
+   * @param componentName
    */
-  public emitChange(componentName: string) {
-    this.emit(ComponentChange, {
+  public emitChange(componentName: string, EventType: typeof Event) {
+    const evt = {
       componentName,
       entity: this
-    })
+    }
+
+    this.emit(ComponentChange, evt)
+    this.emit(EventType, evt);
   }
 
   public toJSON() {
