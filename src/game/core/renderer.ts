@@ -10,7 +10,6 @@ class Renderer {
     const loader = this.loader;
     
     return new Promise( (resolve, reject) => {
-      console.log("SPrites", Sprites)
       //@ts-ignore
       for (var k in Sprites) {
         loader.add(Sprites[k])

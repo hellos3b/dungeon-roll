@@ -4,11 +4,14 @@ import Entity from '../entity';
 import Scene from '../scene';
 import System from '../system';
 
-/** Spy on calls */
+/** System.update() is called */
 const updateFruit = jest.fn();
+
+/** System.update() is called */
 const updateFruitSales = jest.fn();
-const componentSetup = jest.fn();
-const componentTeardown = jest.fn();
+
+const saleComponentAdded = jest.fn();
+const saleComponentRemoved = jest.fn();
 
 /** Sample Components */
 const Fruit = Component.define("fruit")
@@ -17,25 +20,39 @@ const OnSale = Component.define("on-sale", {
     amount: 0,
     price: 0,
     section: ""
-  },
-  setup() {
-    this.state.section = "fresh";
-    componentSetup();
-  },
-  teardown: componentTeardown
+  }
 })
 
 
 /** Systems */
-class FruitSystem implements System {
-  family = [Fruit];
-  update = updateFruit;
+class FruitSystem extends System {
+  components = [Fruit];
+  update() {
+    updateFruit(this.entities)
+  }
 }
 
-class FruitSaleSystem implements System {
-  family = [Fruit, OnSale];
-  update = updateFruitSales;
+class FruitSaleSystem extends System {
+  components = [Fruit, OnSale];
+  entityAdded(entity: Entity) {
+    saleComponentAdded(entity);
+  }
+  update() {
+    updateFruitSales(this.entities)
+  }
+  entityRemoved(entity: Entity) {
+    console.log("ENTITY REMOOOOOVED")
+    saleComponentRemoved(entity);
+  }
 }
+
+beforeEach(() => {
+  // Reset mock functions
+  updateFruit.mockReset();
+  updateFruitSales.mockReset();
+  saleComponentAdded.mockReset();
+  saleComponentRemoved.mockReset();
+})
 
 // Begin tests
 describe('ECS Engine', () => { 
@@ -44,26 +61,25 @@ describe('ECS Engine', () => {
     scene: Scene,
     apple: Entity,
     tomato: Entity,
-    broccoli: Entity;
+    broccoli: Entity,
+    orange: Entity;
 
   beforeEach(() => {
-    // Reset mock functions
-    updateFruit.mockReset();
-    updateFruitSales.mockReset();
-    componentSetup.mockReset();
-    componentTeardown.mockReset();
-
     // Create entities
     apple = Entity.create("apple", [
       Fruit(),
       OnSale({ price: 5 })
     ])
-
+    
     tomato = Entity.create("tomato", [
       Fruit()
     ])
 
     broccoli = Entity.create("broccoli");
+    orange = Entity.create("orange", [
+      Fruit(),
+      OnSale()
+    ]);
 
     // Create scene
     scene = Scene.create("Grocery Store", {
@@ -92,34 +108,6 @@ describe('ECS Engine', () => {
       const sale = OnSale({amount: 12})
       expect(sale.state.amount).toEqual(12)
       expect(sale.state.price).toEqual(0)
-    })
-
-    it("called setup when entity was added", () => {
-      expect(componentSetup).toBeCalled();
-    })
-
-    it("called teardown when entity was removed", () => {
-      apple.remove();
-      engine.run(0);
-      expect(componentTeardown).toBeCalled();
-    })
-
-    it("called setup when component was added", () => {
-      componentSetup.mockReset()
-      tomato.addComponent(OnSale())
-      expect(componentSetup).toBeCalled()
-    })
-
-    it("called teardown when component was removed", () => {
-      componentTeardown.mockReset();
-      apple.removeComponent(OnSale);
-      engine.run(0);
-      expect(componentTeardown).toBeCalled();
-    })
-
-    it("updates own state on setup", () => {
-      const sale = apple.getComponent(OnSale)
-      expect(sale.state.section).toEqual("fresh")
     })
   })
 
@@ -197,6 +185,34 @@ describe('ECS Engine', () => {
         engine.run(0)
         expectEntitiesFrom(updateFruit).toHaveLength(1);
       })
+
+      it("calls componentAdded event when entity gets a component", () => {
+        saleComponentAdded.mockReset();
+        tomato.addComponent(OnSale())
+        expect(saleComponentAdded).toBeCalled()
+      })
+
+      it("calls componentAdded event when entity is added", () => {
+        saleComponentAdded.mockReset();
+        scene.addEntity(orange);
+        expect(saleComponentAdded).toBeCalled()
+      })
+
+      it("calls componentRemoved event when entity removes component", () => {
+        saleComponentRemoved.mockReset();
+        console.log("remove component", OnSale)
+        apple.removeComponent(OnSale)
+        expect(saleComponentRemoved).toBeCalled()
+      })
+
+      it("calls componentRemoved event when entity is removed", () => {
+        saleComponentRemoved.mockReset();
+        apple.remove()
+        engine.run(0)
+        expect(saleComponentRemoved).toBeCalled()
+      })
+
+      // todo: it DOESNT call if entity already exists?
     })
   })
 });

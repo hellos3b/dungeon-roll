@@ -6,11 +6,16 @@ import renderer from 'game/core/renderer';
 
 const engine = new Engine()
 
-function run(prevTime: number) {
-  const newTime = new Date().getTime()
-  engine.run((newTime - prevTime) / 1000)
+let lastTime = 0;
 
-  setTimeout(() => run(newTime), 1000/60);
+const run = () => {
+  const now = Date.now()
+  const delta = (now - lastTime) / 1000;
+  
+  engine.run(delta)
+
+  lastTime = now
+  requestAnimationFrame(run)
 }
 
 (async function() {
@@ -20,9 +25,8 @@ function run(prevTime: number) {
   container?.appendChild(renderer.app.view);
   
   const main = Main();
-
   engine.setScene(main)
 
-  // start game
-  run(new Date().getTime())
+  lastTime = Date.now();
+  requestAnimationFrame(run);
 })();

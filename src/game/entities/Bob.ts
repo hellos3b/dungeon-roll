@@ -1,3 +1,4 @@
+import Clickable from 'game/components/Clickable';
 import {Entity} from 'lib/ecs';
 import Position from 'game/components/Position';
 import Sprite from 'game/components/Sprite';
@@ -9,8 +10,11 @@ export default () => Entity.create("Bob", [
   Position({ x: 20, y: 20}),
 
   Sprite({
-    src: TestSprite
+    src: TestSprite,
+    interactive: true
   }),
+
+  Clickable(),
 
   SpriteRenderer()
   

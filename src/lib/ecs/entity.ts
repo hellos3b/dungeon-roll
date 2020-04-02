@@ -3,16 +3,9 @@ import {EmitEvent, Event} from '../events';
 
 export class ComponentChange extends Event {
   entity: Entity;
-  componentName: string;
 }
-export class ComponentAdd extends Event {
-  entity: Entity;
-  componentName: string;
-}
-export class ComponentRemove extends Event {
-  entity: Entity;
-  componentName: string;
-}
+export class ComponentAdd extends ComponentChange {}
+export class ComponentRemove extends ComponentChange {}
 
 class EntityClass {
   /** ID of entity, must be unique. Used for caching/mapping */
@@ -45,8 +38,7 @@ class EntityClass {
    **/
   public addComponent(component: Component) {
     this.components.set(component.name, component)
-    component.setup();
-    this.emitChange(component.name, ComponentAdd)
+    this.emitChange(ComponentAdd)
   }
 
   /** 
@@ -83,20 +75,11 @@ class EntityClass {
    **/
   public removeComponent(findComponent: Component|ComponentCreator<any>) {
     let name = (typeof findComponent === 'function') ? findComponent.componentName : findComponent.name;
-    const component = this.components.get(name);
-
-    component?.teardown();
     this.components.delete(name);
 
-    this.emitChange(name, ComponentRemove)
+    this.emitChange(ComponentRemove)
     
     return this;
-  }
-
-  public teardown() {
-    this.componentsList.forEach(component => {
-      this.removeComponent(component);
-    });
   }
 
   /**
@@ -111,11 +94,8 @@ class EntityClass {
    * 
    * @param componentName
    */
-  private emitChange(componentName: string, EventType: typeof Event) {
-    const evt = {
-      componentName,
-      entity: this
-    }
+  private emitChange(EventType: typeof Event) {
+    const evt = {entity: this}
 
     this.emit(ComponentChange, evt)
     this.emit(EventType, evt);

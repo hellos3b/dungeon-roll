@@ -15,9 +15,6 @@ export default class Scene {
   /** All the current systems */
   private systems: System[] = [];
 
-  /** A cache of components, used for filtering for systems */
-  private componentsCache = new ComponentsCache();
-
   /** Event emitter */
   public events = new EventEmitter();
   
@@ -25,7 +22,7 @@ export default class Scene {
     this.name = name;
     
     this.events.on(ComponentChange, event => {
-      this.componentsCache.dirtify(event.componentName)
+      this.entityChange(event.entity);
     })
   }
 
@@ -59,16 +56,14 @@ export default class Scene {
       .filter( entity => {
         if (!entity.delete) return true;
 
-        entity.teardown()
+        console.log("deleting, emit entity change")
+        this.entityChange(entity)
         
         return false;
       })
 
-    this.componentsCache.update(this.entities);
-
     this.systems.forEach(system => {
-      const entities = this.componentsCache.getEntitiesWith(system.family);
-      system.update(entities, delta)
+      system.update(delta)
     });
   }
 
@@ -82,18 +77,14 @@ export default class Scene {
     entity.emit = this.events.emit;
       
     this.entities.push(entity);
-    this.dirtifyEntity(entity);
+    this.entityChange(entity);
 
     return entity;
   }
 
-  /**
-   * Mark all components from an entity as "dirty"
-   * 
-   */
-  private dirtifyEntity(entity: Entity) {
-    entity.componentsList.forEach(comp => {
-      this.componentsCache.dirtify(comp.name);
+  private entityChange(entity: Entity) {
+    this.systems.forEach( sys => {
+      sys.checkEntity(entity);
     })
   }
 
