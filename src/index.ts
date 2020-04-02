@@ -2,7 +2,7 @@ import 'regenerator-runtime/runtime'
 
 import { Engine } from 'lib/ecs';
 import Main from 'game/scenes/Main';
-import renderer from 'game/core/renderer';
+import stage from 'game/core/stage';
 
 const engine = new Engine()
 
@@ -20,9 +20,9 @@ const run = () => {
 
 (async function() {
   // Initialize PIXI instance
-  await renderer.load();
+  await stage.load();
   const container = document.getElementById("game");
-  container?.appendChild(renderer.app.view);
+  container?.appendChild(stage.app.view);
   
   const main = Main();
   engine.setScene(main)

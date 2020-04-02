@@ -2,7 +2,7 @@ import * as PIXI from 'pixi.js';
 
 import Sprites from '../../assets/sprites/*.jpg';
 
-class Renderer {
+class Stage {
   app = new PIXI.Application();
   loader = PIXI.Loader.shared;
 
@@ -31,4 +31,4 @@ class Renderer {
   }
 }
 
-export default new Renderer();
+export default new Stage();

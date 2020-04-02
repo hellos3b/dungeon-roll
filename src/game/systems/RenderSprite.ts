@@ -6,7 +6,7 @@ import { Event } from 'lib/events';
 import Position from 'game/components/Position';
 import Sprite from 'game/components/Sprite';
 import SpriteRenderer from 'game/components/SpriteRenderer';
-import renderer from 'game/core/renderer';
+import stage from 'game/core/stage';
 
 export class ClickEntity extends Event {
   entity: Entity;
@@ -19,8 +19,8 @@ export default class RenderSprite extends System {
     const component = entity.getComponent(Sprite);
     const sprite = new PIXI.Sprite()
 
-    sprite.texture = renderer.getTexture(component.state.src);
-    renderer.addSprite(sprite)
+    sprite.texture = stage.getTexture(component.state.src);
+    stage.addSprite(sprite)
 
     component.state.sprite = sprite;
   }

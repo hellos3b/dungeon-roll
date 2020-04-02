@@ -1,7 +1,6 @@
 import * as PIXI from 'pixi.js';
 
 import {Component} from "lib/ecs";
-import renderer from 'game/core/renderer';
 
 type Sprite = {
   /** URL Path to sprite */
